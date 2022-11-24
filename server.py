@@ -14,6 +14,30 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Bind Socket
 server.bind(ADDR)
 
+presetRGB = {"red" : "255000000", 
+            "green" : "000255000", 
+            "blue" : "000000255", 
+            "yellow" : "255255000", 
+            "black" : "000000000", 
+            "white" : "255255255", 
+            "gray" : "128128128", 
+            "purple" : "128000128"}
+
+
+# Parse RGB Values
+def ParseRGB(msg) :
+    if msg in presetRGB:
+        value = presetRGB[msg]
+        red = int(value[0:3])
+        green = int(value[3:6])
+        blue = int(value[6:9])
+    else :
+        red = int(msg[0:3])
+        green = int(msg[3:6])
+        blue = int(msg[6:9])
+
+    return red, green, blue
+
 # Handle Client
 def handle_client(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected")
@@ -25,15 +49,16 @@ def handle_client(conn, addr):
             msg_length = int(msg_length)
             msg = conn.recv(msg_length).decode(FORMAT)
             if msg == DISCONNECT_MESSAGE:
-                connected = False;
-
-            print(f"[{addr}] {msg}")
+                connected = False
+            else :
+                red, green, blue = ParseRGB(msg)
+            print(f"[{addr}] red: {red} green: {green} blue: {blue}")
 
     conn.close()
 
 # Start
 def start():
-    server.listen();
+    server.listen()
     print(f"[LISTENING] Server is listening on {SERVER}")
     while True:
         conn, addr = server.accept()

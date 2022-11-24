@@ -23,7 +23,7 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 
 print("------------\n")
-print("Please Enter Your Message")
+print("What Color Would You Like?")
 print(f">> To Disconnect, type {DISCONNECT_MESSAGE}")
 
 quit = False

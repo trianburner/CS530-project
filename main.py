@@ -5,9 +5,7 @@ import utime
 import _thread
 from hcsr04 import HCSR04
 from alarm import Alarm
-import lights
-
-# Networking imports
+from lights import PixelStrip
 import socket
 import network
 import rp2
@@ -15,9 +13,17 @@ import network
 import ubinascii
 import urequests as requests
 
-# Set pins for ultrasonic sensor and alarm trigger
-sensor = HCSR04(trigger_pin = 15, echo_pin = 14, echo_timeout_us = 10000)
-alarm = Alarm(trigger_pin = 13)
+# Pin setting constants
+SENSOR_TRIGGER_PIN = 15
+SENSOR_ECHO_PIN = 14
+ALARM_TRIGGER_PIN = 13
+NEOPIXEL_DATA_PIN = 7
+NEOPIXEL_NUM_PIXELS = 50
+
+# Instantiate objects
+sensor = HCSR04(trigger_pin = SENSOR_TRIGGER_PIN, echo_pin = SENSOR_ECHO_PIN, echo_timeout_us = 10000)
+alarm = Alarm(trigger_pin = ALARM_TRIGGER_PIN)
+lights = PixelStrip(data_pin = NEOPIXEL_DATA_PIN, num_pixels = NEOPIXEL_NUM_PIXELS)
 LED = machine.Pin("LED", machine.Pin.OUT)
 
 # Settings
@@ -26,7 +32,6 @@ wallDistance = 10
 color = (255, 0, 0)
 preset = 0
 alarmOn = False
-
 
 def sensorPolling_thread():
     global wallDistance
@@ -39,7 +44,7 @@ def sensorPolling_thread():
         #print('Distance:', distance, 'cm')
         if (distance > 0) and (distance < wallDistance) :
             alarm.on()
-            lights.alt_color()
+            lights.rainbow_cycle()
         else:
             alarm.off()
         sleep(.1)
@@ -127,6 +132,5 @@ try:
             cl.close()
             print('Connection closed')
 except KeyboardInterrupt:
-    cl.close()
     running = False
     _thread.exit()

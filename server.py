@@ -1,5 +1,12 @@
 import socket
 import threading
+from lights import rgb_color, PixelStrip
+from alarm import Alarm
+from main import alarm_window
+
+NEOPIXEL_DATA_PIN = 7
+NEOPIXEL_NUM_PIXELS = 50
+ALARM_TRIGGER_PIN = 13
 
 HEADER = 64
 PORT = 5050
@@ -14,6 +21,10 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Bind Socket
 server.bind(ADDR)
 
+lights = PixelStrip(data_pin = NEOPIXEL_DATA_PIN, num_pixels = NEOPIXEL_NUM_PIXELS)
+alarm = Alarm(trigger_pin = ALARM_TRIGGER_PIN)
+rgb = rgb_color
+
 presetRGB = {"red" : "255000000", 
             "green" : "000255000", 
             "blue" : "000000255", 
@@ -25,6 +36,7 @@ presetRGB = {"red" : "255000000",
 
 
 # Parse RGB Values
+# This is just sitting here.
 def ParseRGB(msg) :
     if msg in presetRGB:
         value = presetRGB[msg]
@@ -38,21 +50,40 @@ def ParseRGB(msg) :
 
     return red, green, blue
 
+# I ultimately don't know where any of this info is going.
+def Begin(conn, addr, msg):
+    message = msg.split("-")
+    if (message[0] == "COLOR"):
+        print(f"[{addr}] COLOR")
+        rgb[0] = (message[1], message[2], message[3])
+        # lights.alt_color
+    elif (message[0] == "ALARM"):
+        print(f"[{addr}] ALARM")
+        alarm_window = (message[1], message[2])
+        # alarm.on()
+    elif (message[0] == "POWER"):
+        print(f"[{addr}] POWER")
+        pass
+    
+
 # Handle Client
+
+# sends and recieves are sequential. Once it is in a receive state, it will not move on till the socket receives a message
 def handle_client(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected")
     
     connected = True
     while connected:
-        msg_length = conn.recv(HEADER).decode(FORMAT)
+        msg_length = conn.recv(HEADER).decode(FORMAT) # This allows for variation in input sizes
         if msg_length:
             msg_length = int(msg_length)
             msg = conn.recv(msg_length).decode(FORMAT)
             if msg == DISCONNECT_MESSAGE:
                 connected = False
             else :
-                red, green, blue = ParseRGB(msg)
-            print(f"[{addr}] red: {red} green: {green} blue: {blue}")
+                msgOut = "Instruction Received"
+                conn.send(msgOut.encode(FORMAT))
+                Begin(conn, addr, msg)
 
     conn.close()
 

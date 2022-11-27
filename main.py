@@ -33,7 +33,7 @@ rtc = RTC()
 # Settings
 running = True
 wallDistance = 10
-alarm_window = (20, 30, 07, 00)
+alarm_window = (1230, 420)
 
 def sensorPolling_thread():
     global wallDistance
@@ -46,9 +46,15 @@ def sensorPolling_thread():
     while running:
         distance = sensor.distance_cm()
         if (distance > 0) and (distance < wallDistance) :
-            alarm.on()
-            lights.run()
-            alarm.off()
+            current_time = rtc.datetime()
+            current_time = (current_time[4] * 60) + current_time[5]
+            
+            if current_time > alarm_window[0] or current_time < alarm_window[1]:
+                alarm.on()
+                lights.run(2)
+                alarm.off()
+            else:
+                lights.run(3)
         else:
             pass
         sleep(.1)
@@ -58,51 +64,54 @@ def sensorPolling_thread():
 _thread.start_new_thread(sensorPolling_thread, ())
 
 try:
+    # Configure AP settings
     ap = network.WLAN(network.AP_IF)
-    ap.config(essid=SSID, password=PASSWORD) 
+    ap.config(essid=SSID, password=PASSWORD)
     ap.active(True)
 
+    # Wait until the AP is active until continuing
     while ap.active == False:
         pass
 
+    # Disable power-saving
+    ap.config(pm = 0xa11140)
+    
+    # Set static IP address
     ap.ifconfig(('192.168.1.2', '255.255.255.0', '192.168.1.1', '8.8.8.8'))
+    
+    # Set country
+    rp2.country('US')
 
     print("Access point active")
     print(ap.ifconfig())
     
-    # Set country to avoid possible errors
-    rp2.country('US')
-
-
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    # Disable power-saving
-    wlan.config(pm = 0xa11140)
 
     # See the MAC address in the wireless chip OTP
-    mac = ubinascii.hexlify(network.WLAN().config('mac'),':').decode()
-    print('mac = ' + mac)
+    #mac = ubinascii.hexlify(network.WLAN().config('mac'),':').decode()
+    #print('mac = ' + mac)
         
-    # HTTP server with socket
+    # Get socket address
     addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
 
+    # Create socket, bind it, and listen for connections
     s = socket.socket()
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(addr)
     s.listen(1)
 
     print('Listening on', addr)
-    # Listen for connections
+    
+    # Check for connections and accept them
     while True:
         try:
             cl, addr = s.accept()
             print('Client connected from', addr)
             r = cl.recv(1024)
-            # print(r)
+            print(r)
             
             r = str(r)
                 
-            cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
+            cl.send("Hello, World!")
 
             cl.close()
             
@@ -112,6 +121,8 @@ try:
             
 except KeyboardInterrupt:
     running = False
+    print("Exiting threads")
     time.sleep(10)
     gc.collect()
-    sys.exit()
+    print("Done")
+    _thread.exit()

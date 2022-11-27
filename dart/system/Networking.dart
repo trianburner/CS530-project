@@ -1,22 +1,53 @@
+import 'dart:async';
 import 'dart:io';
+import 'notification_service.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 class Network extends InheritedWidget {
   Socket? client;
+  StreamSubscription? listener;
 
   Network({
     Key? key,
     required Widget child,
-  }) : super(key: key, child: child);
+  }) : super(key: key, child: child) {
+    NotificationService.init();
+  }
 
   Future<void> initClient(String ip) async {
     if (ip == "") {
       sendMessage("!DISCONNECT");
       await client?.close();
-      client = null;
+
+      client = listener = null;
     } else {
-      client = await Socket.connect(ip, 5050).timeout(Duration(seconds: 15));
+      client = await Socket.connect(ip, 5050).timeout(Duration(seconds: 10));
+      listener = listenToServer();
+    }
+  }
+
+  StreamSubscription? listenToServer() {
+    if (client != null) {
+      return client!.listen(
+        // handle data from the client
+              (Uint8List data) async {
+            final message = String.fromCharCodes(data);
+            print(message);
+            NotificationService.showNotif(id: 0,
+                title: "ALERT",
+                body: "Motion was recently detected near RGB lights.");
+          },
+          onError: (error) {
+            print(error);
+            client?.close();
+          },
+          onDone: () {
+            print('Client left');
+            client?.close();
+          });
+    } else {
+      return null;
     }
   }
 
@@ -38,7 +69,7 @@ class Network extends InheritedWidget {
 
   static Network of(BuildContext context) {
     final Network? result =
-        context.dependOnInheritedWidgetOfExactType<Network>();
+    context.dependOnInheritedWidgetOfExactType<Network>();
     assert(result != null, 'No Network found in context');
     return result!;
   }

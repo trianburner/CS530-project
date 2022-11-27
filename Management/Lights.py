@@ -1,16 +1,21 @@
+"""
+Lights.py contains implementation for managing the LED
+"""
+
 import time
 import machine
 import neopixel
+from System import Internal
 
 SLEEP_TIME = 1
-rgb_color = [(0,0,255),(255, 0 ,0)]
 
 class PixelStrip:
+    """
+    handles several different progressions for the device's lighting
+    """
     def __init__(self, data_pin, num_pixels):
         self.num_pixels = num_pixels
         self.pixels = neopixel.NeoPixel(machine.Pin(data_pin), num_pixels)
-        
-        self.color = (255, 255, 255)
 
     def wheel(self, pos):
         # Input a value 0 to 255 to get a color value.
@@ -31,9 +36,9 @@ class PixelStrip:
             r = 0
             g = int(pos * 3)
             b = int(255 - pos * 3)
-        return (r, b, g)
+        return r, b, g
 
-    # Cycles the rainbow accross the length of the pixels
+    # Cycles the rainbow across the length of the pixels
     def rainbow_cycle(self):
         for j in range(255):
             for i in range(self.num_pixels):
@@ -46,9 +51,9 @@ class PixelStrip:
     # Spreads a color accross the length of the pixels, with second color transition
     def alt_color(self):
         for x in range(self.num_pixels):
-            for y in range(len(rgb_color)):
+            for y in range(len(Internal.RGB)):
                 if x < 50:
-                    self.pixels[x] = rgb_color[y]
+                    self.pixels[x] = Internal.RGB[y]
                     x = x + 1
             self.pixels.write()
             time.sleep(0.05)
@@ -57,7 +62,7 @@ class PixelStrip:
         
     def color_wipe(self):
         for i in range(self.num_pixels):
-            self.pixels[i] = self.color
+            self.pixels[i] = Internal.RGB
             self.pixels.write()
             time.sleep(0.05)
         time.sleep(SLEEP_TIME)
@@ -92,14 +97,11 @@ class PixelStrip:
             if allOff == 1:
                 break
             time.sleep(0.001)
-            
-    def run(self, preset = 0, color = (255, 255, 255)):
-        if preset == 0:
-            self.color = (color[0], color[2], color[1])
+
+    def run(self, action):
+        if action == 0: # Activate lights
             self.color_wipe()
-        elif preset == 1:
-            self.color_wipe()
-        elif preset == 2:
+        elif action == 1: # Activate lights for alarm
             self.alarm()
-        elif preset == 3:
+        elif action == 2: # Activate rainbow lights ~ not used as of now
             self.rainbow_cycle()

@@ -1,4 +1,6 @@
-import machine, time
+"""
+Alarm.py implements the external Alarm, managing on & off states
+"""
 from machine import Pin
 
 class Alarm:

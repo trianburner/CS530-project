@@ -4,13 +4,13 @@ import neopixel
 
 SLEEP_TIME = 1
 rgb_color = [(0,0,255),(255, 0 ,0)]
-alarm_Mode = False
-
 
 class PixelStrip:
     def __init__(self, data_pin, num_pixels):
         self.num_pixels = num_pixels
         self.pixels = neopixel.NeoPixel(machine.Pin(data_pin), num_pixels)
+        
+        self.color = (255, 255, 255)
 
     def wheel(self, pos):
         # Input a value 0 to 255 to get a color value.
@@ -41,7 +41,6 @@ class PixelStrip:
                 self.pixels[i] = self.wheel(pixel_index & 255)
             self.pixels.write()
             time.sleep(.1)
-        #time.sleep(SLEEP_TIME)
         self.fadeOff()
 
     # Spreads a color accross the length of the pixels, with second color transition
@@ -52,9 +51,27 @@ class PixelStrip:
                     self.pixels[x] = rgb_color[y]
                     x = x + 1
             self.pixels.write()
-            time.sleep(0.1)
+            time.sleep(0.05)
         time.sleep(SLEEP_TIME)
         self.fadeOff()
+        
+    def color_wipe(self):
+        for i in range(self.num_pixels):
+            self.pixels[i] = self.color
+            self.pixels.write()
+            time.sleep(0.05)
+        time.sleep(SLEEP_TIME)
+        self.fadeOff()
+        
+    def alarm(self):
+        for i in range(10):
+            self.pixels.fill((255, 0, 0))
+            self.pixels.write()
+            time.sleep(0.25)
+            self.pixels.fill((255, 255, 255))
+            self.pixels.write()
+            time.sleep(0.25)
+        self.off()
 
     # Turns all pixels off
     def off(self):
@@ -75,13 +92,14 @@ class PixelStrip:
             if allOff == 1:
                 break
             time.sleep(0.001)
-
-    '''
-    while True:
-        if(sensor):
-            if(alarm_Mode):
-                GPIO.output(buzzer, GPIO.HIGH)
-                pixels.fill(255,0,0)
-            else:
-                alt_color(rgb_color)
-    '''
+            
+    def run(self, preset = 0, color = (255, 255, 255)):
+        if preset == 0:
+            self.color = (color[0], color[2], color[1])
+            self.color_wipe()
+        elif preset == 1:
+            self.color_wipe()
+        elif preset == 2:
+            self.alarm()
+        elif preset == 3:
+            self.rainbow_cycle()

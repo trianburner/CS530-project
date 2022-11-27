@@ -1,8 +1,8 @@
 import socket
 import threading
-from lights import rgb_color, PixelStrip
+from lights import PixelStrip
 from alarm import Alarm
-from main import alarm_window
+from main import sensorPolling_thread
 
 NEOPIXEL_DATA_PIN = 7
 NEOPIXEL_NUM_PIXELS = 50
@@ -23,7 +23,7 @@ server.bind(ADDR)
 
 lights = PixelStrip(data_pin = NEOPIXEL_DATA_PIN, num_pixels = NEOPIXEL_NUM_PIXELS)
 alarm = Alarm(trigger_pin = ALARM_TRIGGER_PIN)
-rgb = rgb_color
+alarm_window = sensorPolling_thread.alarm_window
 
 presetRGB = {"red" : "255000000", 
             "green" : "000255000", 
@@ -55,7 +55,7 @@ def Begin(conn, addr, msg):
     message = msg.split("-")
     if (message[0] == "COLOR"):
         print(f"[{addr}] COLOR")
-        rgb[0] = (message[1], message[2], message[3])
+        lights.run(0,(message[1],message[2],message[3]))
         # lights.alt_color
     elif (message[0] == "ALARM"):
         print(f"[{addr}] ALARM")
@@ -69,8 +69,8 @@ def Begin(conn, addr, msg):
 # Handle Client
 
 # sends and recieves are sequential. Once it is in a receive state, it will not move on till the socket receives a message
-def handle_client(conn, addr):
-    print(f"[NEW CONNECTION] {addr} connected")
+def recv(conn, addr):
+    print(f"[NEW CONNECTION] {addr} ready to receive")
     
     connected = True
     while connected:
@@ -81,11 +81,16 @@ def handle_client(conn, addr):
             if msg == DISCONNECT_MESSAGE:
                 connected = False
             else :
-                msgOut = "Instruction Received"
-                conn.send(msgOut.encode(FORMAT))
+                send(conn,addr,"Instruction Recieved")
                 Begin(conn, addr, msg)
 
     conn.close()
+
+def send(conn, addr, msg):
+    
+    conn.send(msg.encode(FORMAT))
+
+    print("[STATUS] message sent to {addr}")
 
 # Start
 def start():
@@ -93,8 +98,8 @@ def start():
     print(f"[LISTENING] Server is listening on {SERVER}")
     while True:
         conn, addr = server.accept()
-        thread = threading.Thread(target=handle_client, args=(conn,addr))
-        thread.start()
+        recv_thread = threading.Thread(target=recv, args=(conn,addr))
+        recv_thread.start()
         print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1}")
 
 print("[STARTING} server is starting")

@@ -23,7 +23,7 @@ Check out our demo of the hardware here:
 5. Trip the motion sensors to see your new settings
 
 Click the thumbnail below to see the app in action
-[![YouTube thumbnail](./Images/app_demo_thumb.png)](https://www.youtube.com/watch?v=-dNZLqMhMHs&t=0s)
+[![YouTube thumbnail](./Images/app_demo_thumb.png)](https://www.youtube.com/watch?v=ykn369DWDXE)
 ## Project Structure
 ```
 $PROJECT_ROOT

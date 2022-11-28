@@ -7,6 +7,21 @@ Hardware project involving Raspberry Pi Pico W, HCSR04 ultrasonic sensors, a Flu
 ## DEMO Video
 Check out our demo of the hardware here:
 [![YouTube thumbnail](./Images/thumb.jpg)]()
+
+## Directions
+
+### Turn On Device
+1. Plug device into nearby wall outlet.
+    - Device will autostart on default settings
+
+### Connect App
+1. Open the application
+2. Connect to the devices IP
+    - Device will light up when app is connected
+3. Adjust alarm time and/or color to your liking
+4. Tap select/ok to set the desired setting
+5. Trip the motion sensors to see your new settings
+[![YouTube thumbnail](./Images/app_demo_thumb.png)](https://www.youtube.com/watch?v=-dNZLqMhMHs&t=0s)
 ## Project Structure
 ```
 $PROJECT_ROOT

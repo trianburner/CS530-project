@@ -36,6 +36,7 @@ cl = 0
 
 # Settings
 running = True
+pause = False
 wallDistance = 10
 alarm_window = (1230, 420)
 
@@ -43,26 +44,37 @@ def sensorPolling_thread():
     global wallDistance
     global cl
     
+    wallDistance = sensor.distance_cm() - 2
+    
+    if wallDistance < 0:
+        wallDistance = 10
+    
     while running:
+        
         distance = sensor.distance_cm()
-        if (distance > 0) and (distance < wallDistance) :
+        if (distance > 0) and (distance < wallDistance) and not pause:
             current_time = rtc.datetime()
             current_time = (current_time[4] * 60) + current_time[5]
             
-            if current_time > alarm_window[0] or current_time < alarm_window[1]:
+            if (current_time > alarm_window[0] or current_time < alarm_window[1]) and alarm_window[0] > alarm_window[1]:
                 try:
-                    cl.send("ALARM ACTIVATED  ")
-                except:
+                    cl.sendall("ALARM ACTIVATED  ")
+                except Exception as e:
+                    pass
+                
+                alarm.on()
+                lights.run(2)
+                alarm.off()
+            elif (current_time > alarm_window[0] and current_time < alarm_window[1]) and alarm_window[0] < alarm_window[1]:
+                try:
+                    cl.sendall("ALARM ACTIVATED  ")
+                except Exception as e:
                     pass
                 
                 alarm.on()
                 lights.run(2)
                 alarm.off()
             else:
-                try:
-                    cl.send("MOVEMENT DETECTED")
-                except:
-                    pass
                 
                 lights.run(1)
         else:
@@ -110,13 +122,14 @@ try:
         if (message[0] == "COLOR"):
             lights.run(0, (int(message[1]), int(message[2]), int(message[3])))
         elif (message[0] == "ALARM"):
-            alarm_window = ((int(message[1][0:2]) * 60 + int(message[1][3:5])), (int(message[1][0:2]) * 60 + int(message[1][3:5])))
+            alarm_window = ((int(message[1][0:2]) * 60 + int(message[1][3:5])), (int(message[2][0:2]) * 60 + int(message[2][3:5])))
 
     # Get socket address
-    addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
+    addr = socket.getaddrinfo('0.0.0.0', 5050)[0][-1]
 
     # Create socket, bind it, and listen for connections
     s = socket.socket()
+    #s.setblocking(False)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(addr)
     s.listen(1)
@@ -130,6 +143,7 @@ try:
         
         try:
             cl, addr = s.accept()
+            lights.run(1)
             print('Client connected from', addr)
             
             while connected:
@@ -141,6 +155,7 @@ try:
                         connected = False
                     else :
                         handleData(addr, msg)
+            print("Client disconnected")
             cl.close()
             
         except OSError as e:
@@ -148,6 +163,7 @@ try:
             print('Connection closed')
             
 except KeyboardInterrupt:
+    #cl.close()
     running = False
     print("Exiting threads")
     time.sleep(10)

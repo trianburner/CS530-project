@@ -1,6 +1,7 @@
 import time
 import machine
 import neopixel
+import gc
 
 SLEEP_TIME = 1
 rgb_color = [(0,0,255),(255, 0 ,0)]
@@ -96,10 +97,13 @@ class PixelStrip:
     def run(self, preset = 0, color = (255, 255, 255)):
         if preset == 0:
             self.color = (color[0], color[2], color[1])
-            self.color_wipe()
+            gc.collect()
         elif preset == 1:
             self.color_wipe()
+            gc.collect()
         elif preset == 2:
             self.alarm()
         elif preset == 3:
             self.rainbow_cycle()
+        elif preset == 4:
+            self.alt_color()

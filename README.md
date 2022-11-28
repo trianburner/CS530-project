@@ -21,6 +21,8 @@ Check out our demo of the hardware here:
 3. Adjust alarm time and/or color to your liking
 4. Tap select/ok to set the desired setting
 5. Trip the motion sensors to see your new settings
+
+Click the thumbnail below to see the app in action
 [![YouTube thumbnail](./Images/app_demo_thumb.png)](https://www.youtube.com/watch?v=-dNZLqMhMHs&t=0s)
 ## Project Structure
 ```

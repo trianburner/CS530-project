@@ -48,9 +48,6 @@ $PROJECT_ROOT
 |               .DS_Store
 |               Connections.dart
 |               Manage.dart
-|               
- +---Images
-|       thumb.jpg
 |       
 \---pico_w_wlkway
     +---src

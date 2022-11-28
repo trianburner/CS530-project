@@ -10,8 +10,30 @@ Check out our demo of the hardware here:
 ## Project Structure
 ```
 $PROJECT_ROOT
-#NAME?
-|       temp
+ +---flutter_wlkway
+|   |   main.dart
+|   |   
+|   +---system
+|   |       AppData.dart
+|   |       Connection.dart
+|   |       Networking.dart
+|   |       notification_service.dart
+|   |       theme_provider.dart
+|   |       
+|   \---widgets
+|       |   .DS_Store
+|       |   Base.dart
+|       |   
+|       +---buttons
+|       |       ChangeThemeButton.dart
+|       |       
+|       \---pages
+|               .DS_Store
+|               Connections.dart
+|               Manage.dart
+|               
+ +---Images
+|       thumb.jpg
 |       
 \---pico_w_wlkway
     +---src

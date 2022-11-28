@@ -2,7 +2,6 @@
 /// Base.dart holds app scaffolding and manages Connections & Manage pages
 /// 
 import 'package:flutter/material.dart';
-import 'package:rbg_led/widgets/pages/Settings.dart';
 import 'buttons/ChangeThemeButton.dart';
 import 'pages/Connections.dart';
 import 'pages/Manage.dart';

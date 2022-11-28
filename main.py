@@ -23,19 +23,21 @@ NEOPIXEL_DATA_PIN = 7
 NEOPIXEL_NUM_PIXELS = 50
 SSID = "Wlkway LED Controller"
 PASSWORD = "123456789"
+FORMAT = 'utf-8'
+DISCONNECT_MESSAGE = "!DISCONNECT"
+HEADER = 64
 
 # Instantiate objects
 sensor = HCSR04(trigger_pin = SENSOR_TRIGGER_PIN, echo_pin = SENSOR_ECHO_PIN, echo_timeout_us = 10000)
 alarm = Alarm(trigger_pin = ALARM_TRIGGER_PIN)
 lights = PixelStrip(data_pin = NEOPIXEL_DATA_PIN, num_pixels = NEOPIXEL_NUM_PIXELS)
 rtc = RTC()
+cl = 0
 
 # Settings
 running = True
 wallDistance = 10
 alarm_window = (1230, 420)
-
-cl = 0
 
 def sensorPolling_thread():
     global wallDistance
@@ -93,11 +95,23 @@ try:
     print("Access point active")
     print(ap.ifconfig())
     
-
-    # See the MAC address in the wireless chip OTP
-    #mac = ubinascii.hexlify(network.WLAN().config('mac'),':').decode()
-    #print('mac = ' + mac)
+    def handleData(addr, msg):
+        """
+        determines whether device's LED color or alarm window is being updated
+        :param addr: current conn's ip
+        :param msg: msg from conn
+        """
         
+        global alarm_window
+        
+        message = msg.split("-")
+        print(f"[{addr}]: ${msg}")
+
+        if (message[0] == "COLOR"):
+            lights.run(0, (int(message[1]), int(message[2]), int(message[3])))
+        elif (message[0] == "ALARM"):
+            alarm_window = ((int(message[1][0:2]) * 60 + int(message[1][3:5])), (int(message[1][0:2]) * 60 + int(message[1][3:5])))
+
     # Get socket address
     addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
 
@@ -111,13 +125,23 @@ try:
     
     # Check for connections and accept them
     while True:
+        connected = True
+    
+        
         try:
             cl, addr = s.accept()
             print('Client connected from', addr)
             
-            while True:
-                r = cl.recv(1024)
-                print(r)
+            while connected:
+                msg_length = cl.recv(HEADER).decode(FORMAT) # This allows for variation in input sizes
+                if msg_length:
+                    msg_length = int(msg_length)
+                    msg = cl.recv(msg_length).decode(FORMAT)
+                    if msg == DISCONNECT_MESSAGE:
+                        connected = False
+                    else :
+                        handleData(addr, msg)
+            cl.close()
             
         except OSError as e:
             cl.close()

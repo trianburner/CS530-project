@@ -1,3 +1,9 @@
+""" Lights class for interfacing with the neopixel strip as an object with multiple functions and value holding
+
+    Uses the neopixel library to create a neopixel object and provide different lighting functions with presets for different modes.
+    Some presets aren't used, but could be implemeneted later on with additional socket data handling
+ """
+
 import time
 import machine
 import neopixel
@@ -7,6 +13,7 @@ SLEEP_TIME = 1
 rgb_color = [(0,0,255),(255, 0 ,0)]
 
 class PixelStrip:
+    # Initialize PixelStrip object and create neopixel object
     def __init__(self, data_pin, num_pixels):
         self.num_pixels = num_pixels
         self.pixels = neopixel.NeoPixel(machine.Pin(data_pin), num_pixels)
@@ -56,6 +63,7 @@ class PixelStrip:
         time.sleep(SLEEP_TIME)
         self.fadeOff()
         
+    # The default preset, wipe the color accross the length of the strip
     def color_wipe(self):
         for i in range(self.num_pixels):
             self.pixels[i] = self.color
@@ -64,6 +72,7 @@ class PixelStrip:
         time.sleep(SLEEP_TIME)
         self.fadeOff()
         
+    # Alarm preset, flashes white and red
     def alarm(self):
         for i in range(10):
             self.pixels.fill((255, 0, 0))

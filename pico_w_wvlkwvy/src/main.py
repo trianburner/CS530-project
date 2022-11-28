@@ -1,3 +1,9 @@
+""" Main script to start up the Pi Pico W, handle wifi and socket, and start second thread for polling the sensor
+
+    Constants are defined here and object instantiated here as well. Could be broken up into some seperate modules to
+    provide greater readibility and easier implementation of changes in the future.
+ """
+
 import time
 from time import sleep
 from machine import Pin
@@ -40,6 +46,7 @@ pause = False
 wallDistance = 10
 alarm_window = (1230, 420)
 
+# Second thread that constantly polls the distance of the ultrasonic sensor and acts according to a trigger and settings like alarm_window
 def sensorPolling_thread():
     global wallDistance
     global cl
@@ -83,6 +90,7 @@ def sensorPolling_thread():
 
     _thread.exit()
 
+# Start second thread that runs concurrently with the socket receiving below
 _thread.start_new_thread(sensorPolling_thread, ())
 
 try:
@@ -162,6 +170,7 @@ try:
             cl.close()
             print('Connection closed')
             
+# Handles closing threads and connections upon exiting the program so threads don't hang or get stuck
 except KeyboardInterrupt:
     #cl.close()
     running = False

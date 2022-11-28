@@ -1,4 +1,4 @@
-# WVLKWY
+# WVLKWVY
 
 ## CS530-Project
 
@@ -6,7 +6,7 @@ Hardware project involving Raspberry Pi Pico W, HCSR04 ultrasonic sensors, a Flu
 
 ## DEMO Video
 Check out our demo of the hardware here:
-[![YouTube thumbnail](./images/thumb.jpg)]()
+[![YouTube thumbnail](./images/main_video_thumb.png)](https://www.youtube.com/watch?v=p_-XUkFGUn4)
 
 ## Directions
 
@@ -27,7 +27,7 @@ Click the thumbnail below to see the app in action
 ## Project Structure
 ```
 $PROJECT_ROOT
- +---flutter_wlkway
+ +---flutter_wvlkwvy
 |   |   main.dart
 |   |   
 |   +---system
@@ -49,7 +49,7 @@ $PROJECT_ROOT
 |               Connections.dart
 |               Manage.dart
 |       
-\---pico_w_wlkway
+\---pico_w_wvlkwvy
     +---src
     |       alarm.py
     |       hcsr04.py

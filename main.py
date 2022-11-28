@@ -35,13 +35,11 @@ running = True
 wallDistance = 10
 alarm_window = (1230, 420)
 
+cl = 0
+
 def sensorPolling_thread():
     global wallDistance
-    global running
-    global sensor
-    global alarm
-    global lights
-    global alarm_window
+    global cl
     
     while running:
         distance = sensor.distance_cm()
@@ -50,11 +48,21 @@ def sensorPolling_thread():
             current_time = (current_time[4] * 60) + current_time[5]
             
             if current_time > alarm_window[0] or current_time < alarm_window[1]:
+                try:
+                    cl.send("ALARM ACTIVATED  ")
+                except:
+                    pass
+                
                 alarm.on()
                 lights.run(2)
                 alarm.off()
             else:
-                lights.run(3)
+                try:
+                    cl.send("MOVEMENT DETECTED")
+                except:
+                    pass
+                
+                lights.run(1)
         else:
             pass
         sleep(.1)
@@ -106,14 +114,10 @@ try:
         try:
             cl, addr = s.accept()
             print('Client connected from', addr)
-            r = cl.recv(1024)
-            print(r)
             
-            r = str(r)
-                
-            cl.send("Hello, World!")
-
-            cl.close()
+            while True:
+                r = cl.recv(1024)
+                print(r)
             
         except OSError as e:
             cl.close()

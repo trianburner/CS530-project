@@ -4,7 +4,7 @@
 
 Hardware project involving Raspberry Pi Pico W, HCSR04 ultrasonic sensors, a Flutter application, and NeoPixels. Designed to turn on lights when motion is detected. Light color and alarm time are adjustable via the Flutter application. 
 
-## Youtube
+## DEMO Video
 Check out our demo of the hardware here:
 [![YouTube thumbnail](./Images/thumb.jpg)]()
 ## Project Structure
